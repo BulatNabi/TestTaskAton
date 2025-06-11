@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TestTaskAton</name>
+    </assembly>
+    <members>
+        <member name="T:TestTaskAton.Controllers.UsersController">
+            <summary>
+            API для управления пользователями.
+            Доступны операции CRUD над сущностью User.
+            </summary>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.CreateUser(TestTaskAton.Dtos.CreateUserDto)">
+            <summary>
+            Создает нового пользователя. Доступно только администраторам.
+            </summary>
+            <param name="createUserDto">Данные для создания пользователя (логин, пароль, имя, пол, дата рождения, флаг админа).</param>
+            <returns>Информация о созданном пользователе.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.UpdateUser(System.Guid,TestTaskAton.Dtos.UpdateUserDto)">
+            <summary>
+            Изменяет имя, пол или дату рождения пользователя.
+            Может быть изменено администратором или самим пользователем (если он активен).
+            </summary>
+            <param name="id">Уникальный идентификатор пользователя.</param>
+            <param name="updateDto">Данные для обновления пользователя (имя, пол, дата рождения).</param>
+            <returns>Обновленная информация о пользователе.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.ChangeUserPassword(System.Guid,TestTaskAton.Dtos.ChangeUserPasswordDto)">
+            <summary>
+            Изменяет пароль пользователя.
+            Может быть изменено администратором или самим пользователем (если он активен).
+            </summary>
+            <param name="id">Уникальный идентификатор пользователя.</param>
+            <param name="changePasswordDto">Текущий и новый пароль пользователя.</param>
+            <returns>Обновленная информация о пользователе.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.ChangeUserLogin(System.Guid,TestTaskAton.Dtos.ChangeUserLoginDto)">
+            <summary>
+            Изменяет логин пользователя.
+            Может быть изменено администратором или самим пользователем (если он активен). Логин должен оставаться уникальным.
+            </summary>
+            <param name="id">Уникальный идентификатор пользователя.</param>
+            <param name="changeLoginDto">Новый логин пользователя.</param>
+            <returns>Обновленная информация о пользователе.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.GetActiveUsers">
+            <summary>
+            Получает список всех активных пользователей, отсортированных по дате создания. Доступно только администраторам.
+            </summary>
+            <returns>Список активных пользователей.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.GetUserByLogin(System.String)">
+            <summary>
+            Получает информацию о пользователе по его логину. Доступно только администраторам.
+            </summary>
+            <param name="login">Логин пользователя.</param>
+            <returns>Информация о пользователе (имя, пол, дата рождения, статус активности).</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.Login(TestTaskAton.Dtos.LoginDto)">
+            <summary>
+            Аутентификация пользователя и выдача JWT токена.
+            </summary>
+            <param name="loginDto">Логин и пароль пользователя.</param>
+            <returns>JWT токен и информация о пользователе.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.GetOlderUsers(System.Int32)">
+            <summary>
+            Получает список всех пользователей старше указанного возраста. Доступно только администраторам.
+            </summary>
+            <param name="age">Минимальный возраст пользователей.</param>
+            <returns>Список пользователей, соответствующих критерию возраста.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.DeleteUser(TestTaskAton.Dtos.DeleteUserDto)">
+            <summary>
+            Удаляет пользователя по логину (полное удаление или мягкое удаление с простановкой RevokedOn и RevokedBy). Доступно только администраторам.
+            </summary>
+            <param name="deleteDto">Логин пользователя и флаг мягкого удаления.</param>
+            <returns>Статус операции.</returns>
+        </member>
+        <member name="M:TestTaskAton.Controllers.UsersController.RecoverUser(TestTaskAton.Dtos.RecoverUserDto)">
+            <summary>
+            Восстанавливает ранее удаленного (деактивированного) пользователя. Доступно только администраторам.
+            </summary>
+            <param name="recoverDto">Логин пользователя для восстановления.</param>
+            <returns>Обновленная информация о восстановленном пользователе.</returns>
+        </member>
+        <member name="T:TestTaskAton.Migrations.Init">
+            <inheritdoc />
+        </member>
+        <member name="M:TestTaskAton.Migrations.Init.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:TestTaskAton.Migrations.Init.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:TestTaskAton.Migrations.Init.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>
