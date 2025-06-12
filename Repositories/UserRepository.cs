@@ -41,27 +41,18 @@ namespace TestTaskAton.Repositories
         {
             var result = await _userManager.CreateAsync(user, password);
             if (!result.Succeeded)
-            {
                 return result;
-            }
 
             if (isAdmin)
             {
-                bool adminRoleExists = await _roleManager.RoleExistsAsync("Admin");
-                if (!adminRoleExists)
-                {
-                    await _roleManager.CreateAsync(new IdentityRole<Guid> { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid() });
-                }
                 var addToRoleResult = await _userManager.AddToRoleAsync(user, "Admin");
                 if (!addToRoleResult.Succeeded)
-                {
                     Console.WriteLine($"Ошибка при добавлении пользователя {user.Login} в роль Admin: {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
-                }
             }
             return result;
         }
 
-        public async Task<IdentityResult> UpdateUserPropertiesAsync(User user, UpdateUserDto updateDto, string? modifiedBy)
+        public async Task<IdentityResult> UpdateUserPropertiesAsync(User user, UpdateUserDto updateDto, string modifiedBy)
         {
             bool changed = false;
             if (updateDto.Name != null && user.Name != updateDto.Name)
@@ -89,14 +80,14 @@ namespace TestTaskAton.Repositories
             return IdentityResult.Success;
         }
 
-        public async Task<IdentityResult> ChangeUserPasswordAsync(User user, string currentPassword, string newPassword, string? modifiedBy)
+        public async Task<IdentityResult> ChangeUserPasswordAsync(User user, string currentPassword, string newPassword, string modifiedBy)
         {
             user.ModifiedOn = DateTime.UtcNow;
             user.ModifiedBy = modifiedBy;
             return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         }
 
-        public async Task<IdentityResult> ChangeUserLoginAsync(User user, string newLogin, string? modifiedBy)
+        public async Task<IdentityResult> ChangeUserLoginAsync(User user, string newLogin, string modifiedBy)
         {
             var existingUserWithNewLogin = await _userManager.FindByNameAsync(newLogin);
             if (existingUserWithNewLogin != null && existingUserWithNewLogin.Id != user.Id)
@@ -114,7 +105,7 @@ namespace TestTaskAton.Repositories
             return await _userManager.UpdateAsync(user);
         }
 
-        public async Task<IdentityResult> SoftDeleteUserAsync(User user, string? revokedBy)
+        public async Task<IdentityResult> SoftDeleteUserAsync(User user, string revokedBy)
         {
             if (user.RevokedOn != null)
             {
@@ -133,7 +124,7 @@ namespace TestTaskAton.Repositories
             return await _userManager.DeleteAsync(user);
         }
 
-        public async Task<IdentityResult> RecoverUserAsync(User user, string? modifiedBy)
+        public async Task<IdentityResult> RecoverUserAsync(User user, string modifiedBy)
         {
             if (user.RevokedOn == null)
             {

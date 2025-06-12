@@ -48,15 +48,12 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var existingUser = await _userRepository.GetUserByLoginAsync(createUserDto.Login);
+        
         if (existingUser != null)
-        {
             return Conflict("Пользователь с таким логином уже существует.");
-        }
 
         var currentUserLogin = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value ?? "System";
 
@@ -100,20 +97,14 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto updateDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var targetUser = await _userRepository.GetUserByIdAsync(id);
         if (targetUser == null)
-        {
             return NotFound("Пользователь не найден.");
-        }
 
         if (!await HasPermissionToModifyUser(id))
-        {
             return Forbid();
-        }
 
         var currentUserLogin = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value ?? "System";
         var result = await _userRepository.UpdateUserPropertiesAsync(targetUser, updateDto, currentUserLogin);
@@ -142,20 +133,14 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> ChangeUserPassword(Guid id, [FromBody] ChangeUserPasswordDto changePasswordDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var targetUser = await _userRepository.GetUserByIdAsync(id);
         if (targetUser == null)
-        {
             return NotFound("Пользователь не найден.");
-        }
 
         if (!await HasPermissionToModifyUser(id))
-        {
             return Forbid();
-        }
         
         var currentUserLogin = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value ?? "System";
         var result = await _userRepository.ChangeUserPasswordAsync(targetUser, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword, currentUserLogin);
@@ -167,9 +152,7 @@ public class UsersController : ControllerBase
                 ModelState.AddModelError(string.Empty, error.Description);
             }
             if (result.Errors.Any(e => e.Code == "PasswordMismatch"))
-            {
                 return BadRequest("Неверный текущий пароль.");
-            }
             return BadRequest(ModelState);
         }
 
@@ -188,20 +171,14 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> ChangeUserLogin(Guid id, [FromBody] ChangeUserLoginDto changeLoginDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var targetUser = await _userRepository.GetUserByIdAsync(id);
         if (targetUser == null)
-        {
             return NotFound("Пользователь не найден.");
-        }
 
         if (!await HasPermissionToModifyUser(id))
-        {
             return Forbid();
-        }
         
         var currentUserLogin = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value ?? "System";
         var result = await _userRepository.ChangeUserLoginAsync(targetUser, changeLoginDto.NewLogin, currentUserLogin);
@@ -213,9 +190,7 @@ public class UsersController : ControllerBase
                 ModelState.AddModelError(string.Empty, error.Description);
             }
             if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
-            {
                 return Conflict("Пользователь с таким логином уже существует.");
-            }
             return BadRequest(ModelState);
         }
 
@@ -249,11 +224,10 @@ public class UsersController : ControllerBase
     {
         var user = await _userRepository.GetUserByLoginAsync(login);
         if (user == null)
-        {
             return NotFound("Пользователь не найден.");
-        }
-        var dto = await _userRepository.MapUserToInfoUserDto(user);
-        return Ok(dto);
+        
+        var infoUserDto = await _userRepository.MapUserToInfoUserDto(user);
+        return Ok(infoUserDto);
     }
     /// <summary>
     /// Аутентификация пользователя и выдача JWT токена.
@@ -265,20 +239,16 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var user = await _userRepository.GetUserByLoginAsync(loginDto.Login);
         if (user == null || user.RevokedOn != null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
-        {
             return Unauthorized("Неверный логин или пароль, либо пользователь неактивен.");
-        }
 
         var token = await _userRepository.GenerateJwtTokenAsync(user);
-        var userInfo = await _userRepository.MapUserToInfoUserDto(user);
+        var infoUserDto = await _userRepository.MapUserToInfoUserDto(user);
 
-        return Ok(new AuthResponseDto { Token = token, UserInfo = userInfo });
+        return Ok(new AuthResponseDto { Token = token, UserInfo = infoUserDto });
     }
     /// <summary>
     /// Получает список всех пользователей старше указанного возраста. Доступно только администраторам.
@@ -290,9 +260,7 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<List<InfoUserDto>>> GetOlderUsers([FromRoute] int age)
     {
         if (age < 0 || age > 120)
-        {
             return BadRequest("Возраст должен быть в диапазоне от 0 до 120.");
-        }
 
         var olderUsers = await _userRepository.GetOlderUsersAsync(age);
         var dtos = new List<InfoUserDto>();
@@ -312,15 +280,11 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> DeleteUser([FromBody] DeleteUserDto deleteDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var userToDelete = await _userRepository.GetUserByLoginAsync(deleteDto.Login);
         if (userToDelete == null)
-        {
             return NotFound("Пользователь не найден.");
-        }
 
         IdentityResult result;
         if (deleteDto.SoftDelete)
@@ -340,7 +304,7 @@ public class UsersController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        return Ok("Пользователь успешно удален/деактивирован.");
+        return Ok("Пользователь успешно деактивирован.");
     }
     /// <summary>
     /// Восстанавливает ранее удаленного (деактивированного) пользователя. Доступно только администраторам.
@@ -352,9 +316,7 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> RecoverUser([FromBody] RecoverUserDto recoverDto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         var userToRecover = await _userRepository.GetUserByLoginAsync(recoverDto.Login);
         if (userToRecover == null)

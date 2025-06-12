@@ -7,7 +7,6 @@ public class DbInitializer
     public static async Task Initialize(IServiceProvider serviceProvider)
     {
         var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>(); 
         var logger = serviceProvider.GetRequiredService<ILogger<DbInitializer>>();
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
@@ -41,18 +40,12 @@ public class DbInitializer
                 logger.LogInformation($"Successfully created admin user: {adminLogin}");
                 var roleAssignResult = await userManager.AddToRoleAsync(adminUser, "Admin");
                 if (roleAssignResult.Succeeded)
-                {
                         logger.LogInformation($"Successfully assigned Admin role to {adminLogin}");
-                }
                 else
-                {
                     logger.LogError($"Error assigning Admin role to {adminLogin}: {string.Join(", ", roleAssignResult.Errors.Select(e => e.Description))}");
-                }
             }
             else
-            {
                 logger.LogError($"Error creating admin user {adminLogin}: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
-            }
         }
         else
         {
@@ -62,9 +55,7 @@ public class DbInitializer
                 logger.LogInformation($"Assigning Admin role to existing admin user {adminLogin}");
                 var roleAssignResult = await userManager.AddToRoleAsync(adminUser, "Admin");
                 if (!roleAssignResult.Succeeded)
-                {
                     logger.LogError($"Error assigning Admin role to existing admin user {adminLogin}: {string.Join(", ", roleAssignResult.Errors.Select(e => e.Description))}");
-                }
             }
         }
     }
